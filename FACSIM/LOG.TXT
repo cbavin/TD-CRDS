@@ -1,0 +1,1209 @@
+FACSIMILE-CHEKMAT RELEASE  H010 DATE 28.04.87 VERSION      1
+ (C) COPYRIGHT UNITED KINGDOM ATOMIC ENERGY AUTHORITY 1987
+0The FACSIMILE software is the absolute property of the
+ United Kingdom Atomic Energy Authority.
+ This copy was supplied, for use on one computer, to 
+0Atomic Energy Research Establishment at Harwell
+0who have acquired an irrevocable license to use it.
+ Does that license cover your use of the FACSIMILE software?
+ 
+ THIS PROGRAM OCCUPIES   648864 BYTES;
+ CONSEQUENTLY, THE ARRAY SIZES ARE:
+ ***** MAXIMUM ARRAY SIZES 
+ ** NPARS   13680     REAL SCALARS, ARRAYS, AND WORKSPACE 
+ ** NIAWS   13672     INTEGER ARRAYS AND WORKSPACE 
+ ** NCODE   13672     LOCATIONS FOR CODE 
+ ** NAMES     400     ENTRIES IN DICTIONARY 
+ ** NTEXT   14000     LOCATIONS FOR TEXT (INCLUDING NAMES)
+ ** NCV        50     DATA CURVES 
+ ***** END OF LIST OF SIZES 
+ 
+ * ============================================= ;                               
+ * TD Chemistry                                                                  
+ *                                                                               
+ * Facsim scripted based on kOH Propan Strömungsrohr - CIMS CH4/C3H8 Che        
+ * from J. Muller,11.01.16 based on T.Elste/K.Trawny MPI ;                       
+ * and D. Kubistin, modified Jan 2016: RO2 treatment as parameter;               
+ * chemistry:                                                                    
+ * MCMv3.3.1 Subset generated for the following species:   ;                     
+ * PAN IC3H7NO3 PPN CH3O2NO2 C2H5NO3 ;                                           
+ * added HNO3 thermolyse from Day et al., 2002 and JPL No 18                     
+ * added NO3, O3, HONO, H2O2 thermolsye from Wormack et al., 2017                
+ * added IC3H7NO3 (IPN) thermolyse after Thieser et al., 2016                    
+ * ---------------------------------------------- ;                              
+ * A citation to the MCM website and the relevant mechanism          * ;         
+ * construction protocols should be given in any publication using   * ;         
+ * information obtained from this source, using the following or     * ;         
+ * comparable wording:                                               * ;         
+ * The chemical mechanistic information was taken from the Master    * ;         
+ * Chemical Mechanism, MCM v3.3.1 (ref), via website:                  *         
+ * http://mcm.leeds.ac.uk/MCM.                                       * ;         
+ * The reference should be: (Jenkin et al., Atmos. Environ., 31, 81, * ;         
+ * 1997; Saunders et al., Atmos. Chem. Phys., 3, 161, 2003), for     * ;         
+ * non aromatic schemes; (Jenkin et al., Atmos. Chem. Phys., 3,  * ;             
+ * 181, 2003; Bloss et al., Atmos. Chem. Phys., 5, 641, 2005), for   * ;         
+ * aromatic schemes; (Jenkin et al., Atmos. Chem. Phys.,  12, * ;                
+ * 5275, 2012), for the beta-caryophyllene scheme and (Jenkin et al., ;          
+ * Atmos. Chem. Phys., 15, 11433, 2015), for the isoprene scheme.  * ;           
+ * ============================================= ;                               
+                                                                                 
+ * ------------- ;                                                               
+ compile instant ;                                                               
+0 LOCN   INSTRUCTION
+ 
+    74:* ------------- ;                                                         
+    74:                                                                          
+    74:open 20 "CRDSIn1.asc" old;                                                
+    78:open 21 "CRDSIn2.asc" old;                                                
+    82:open 22 "CRDSIn3.asc" old;                                                
+    86:open 7 "CRDSOUT1.dat" new;                                                
+    90:open 8 "CRDSOUT2.dat" new;                                                
+    94:open 9 "CRDSOUT3.dat" new;                                                
+    98:write 1=7, "TIME, T, P, M, OH, HO2, O3" %;                                
+   108:write 1=8, "TIME, NO, NO2, HO2NO2, HONO, HNO3" %;                         
+   118:write 1=9, "TIME, C4H8, CHEX, NO3, N2O5" %;                               
+   128:                                                                          
+   128:** ;                                                                      
+ 
+ NO. OF VARIABLES =     0
+ NO. IMPLICIT     =     0
+ NO. OF ERRORS    =     0
+0SPACE FOR                             IN USE      FREE     TOTAL
+ INTEGER SCALARS AND ARRAYS                41     13631     13672
+ REAL SCALARS AND ARRAYS                    6     13674     13680
+ INDEXES AND SECRETS                       99       400       499
+ CODE ARRAY                                70     13602     13672
+ NAME DICTIONARY                           10       390       400
+ TEXT ARRAY                               255     13745     14000
+ 
+ 
+ 
+                                                                                 
+ * -------------------------- ;                                                  
+ * VARIABLES TO BE INTEGRATED ;                                                  
+ * -------------------------- ;                                                  
+                                                                                 
+ * MAIN VARIABLES ;                                                              
+                                                                                 
+ VARIABLE                                                                        
+ HCHO MGLYOX HCOCO CH3NO3 C2H5O2 NO2 CH3OH O1D HCOCO3 O3 PAN NO3                 
+ N2O5 H2O2 NO NA PPN PHAN HOCH2CO3 HO2 HO2NO2 C2H5OH IC3H7NO3                    
+ HOCH2CHO CH3COCH3 CH3COCH2O HSO3 CH3CO2H HCOCH2O2 ETHOHNO3 HCOCO3H              
+ CO GLYOX PERPROACID HOCH2CH2O2 ACETOL PROPACID O HNO3 C2H5CO3 SO3               
+ SO2 CH3COCH2O2 CH3CO3 HOCH2CH2O CH3CHO CH3O IC3H7O HOCH2CO2H C2H5OOH            
+ C2H5O HOCH2CO3H OH H2 HYPERACET HONO ETHGLY C2H5NO3 CH3O2NO2                    
+ HYETHO2H HCOCO2H HCOCH2OOH CH3OOH HCOCH2O SA CH3CO3H CH3O2 C4H8                 
+ BU1ENO3O2 C43NO34O2 C2H5CHOOA CH2OOB C2H5CHO HO3C4O2 NBUTOLAO2                  
+ HO3C4OOH HO3C4NO3 HO3C4O HO3C3CHO NBUTOLAOH NBUTOLAOOH NBUTOLANO3               
+ NBUTOLAO MEKCOH C3H6 HYPROPO2H HYPROPO PROPGLY PROPOLNO3 IPROPOLO2H             
+ IPROPOLO PROLNO3 CH3CHOHCHO CHEX CHEXO2 CHEXOOH CHEXNO3 CHEXO CYHEXOL           
+ CYHEXONE;                                                                       
+                                                                                 
+ * ------------------ ;                                                          
+ * PHYSICAL CONSTANTS ;                                                          
+ * ------------------ ;                                                          
+                                                                                 
+ * MAIN CONSTANTS ;                                                              
+ PARAMETER Pi              3.141592;                                             
+ PARAMETER GasConst        8.31434;                                              
+ PARAMETER Boltzman        1.380622E-23;                                         
+ PARAMETER Loschmidt       6.022169E23;                                          
+ PARAMETER Avogadro        22414;                                                
+ PARAMETER NormTemp        273.15;                                               
+ PARAMETER NormPress       1013.25;                                              
+ PARAMETER NormDensity;                                                          
+ PARAMETER M Mambient Mreactor MCRDS Mbefore;                                    
+                                                                                 
+ PARAMETER phi T P PHOT WVOH ;                                                   
+ PARAMETER WVHO2 ;                                                               
+                                                                                 
+ * phi=Photolyse Schalter, WV=Wandverlust ;                                      
+                                                                                 
+ PARAMETER KRO2NO    ;                                                           
+ PARAMETER KRO2HO2   ;                                                           
+ PARAMETER KAPHO2    ;                                                           
+ PARAMETER KAPNO     ;                                                           
+ PARAMETER KRO2NO3   ;                                                           
+ PARAMETER KNO3AL    ;                                                           
+ PARAMETER KDEC      ;                                                           
+ PARAMETER KROPRIM   ;                                                           
+ PARAMETER KROSEC    ;                                                           
+ PARAMETER KCH3O2    ;                                                           
+ PARAMETER K298CH3O2 ;                                                           
+ PARAMETER K14ISOM1  ;                                                           
+ PARAMETER KD0   ;                                                               
+ PARAMETER KDI   ;                                                               
+ PARAMETER KRD   ;                                                               
+ PARAMETER FCD   ;                                                               
+ PARAMETER NCD   ;                                                               
+ PARAMETER FD    ;                                                               
+ PARAMETER KBPAN ;                                                               
+ PARAMETER KC0   ;                                                               
+ PARAMETER KCI   ;                                                               
+ PARAMETER KRC   ;                                                               
+ PARAMETER FCC   ;                                                               
+ PARAMETER NC    ;                                                               
+ PARAMETER FC    ;                                                               
+ PARAMETER KFPAN ;                                                               
+ PARAMETER K10   ;                                                               
+ PARAMETER K1I   ;                                                               
+ PARAMETER KR1   ;                                                               
+ PARAMETER FC1   ;                                                               
+ PARAMETER NC1   ;                                                               
+ PARAMETER F1    ;                                                               
+ PARAMETER KMT01 ;                                                               
+ PARAMETER K20   ;                                                               
+ PARAMETER K2I   ;                                                               
+ PARAMETER KR2   ;                                                               
+ PARAMETER FC2   ;                                                               
+ PARAMETER NC2   ;                                                               
+ PARAMETER F2    ;                                                               
+ PARAMETER KMT02 ;                                                               
+ PARAMETER K30   ;                                                               
+ PARAMETER K3I   ;                                                               
+ PARAMETER KR3   ;                                                               
+ PARAMETER FC3   ;                                                               
+ PARAMETER NC3   ;                                                               
+ PARAMETER F3    ;                                                               
+ PARAMETER KMT03 ;                                                               
+ PARAMETER K40   ;                                                               
+ PARAMETER K4I   ;                                                               
+ PARAMETER KR4   ;                                                               
+ PARAMETER FC4   ;                                                               
+ PARAMETER NC4   ;                                                               
+ PARAMETER F4    ;                                                               
+ PARAMETER KMT04 ;                                                               
+ PARAMETER KMT05 ;                                                               
+ PARAMETER KMT06 ;                                                               
+ PARAMETER K70   ;                                                               
+ PARAMETER K7I   ;                                                               
+ PARAMETER KR7   ;                                                               
+ PARAMETER FC7   ;                                                               
+ PARAMETER NC7   ;                                                               
+ PARAMETER F7    ;                                                               
+ PARAMETER KMT07 ;                                                               
+ PARAMETER K80   ;                                                               
+ PARAMETER K8I   ;                                                               
+ PARAMETER KR8   ;                                                               
+ PARAMETER FC8   ;                                                               
+ PARAMETER NC8   ;                                                               
+ PARAMETER F8    ;                                                               
+ PARAMETER KMT08 ;                                                               
+ PARAMETER K90   ;                                                               
+ PARAMETER K9I   ;                                                               
+ PARAMETER KR9   ;                                                               
+ PARAMETER FC9   ;                                                               
+ PARAMETER NC9   ;                                                               
+ PARAMETER F9    ;                                                               
+ PARAMETER KMT09 ;                                                               
+ PARAMETER K100  ;                                                               
+ PARAMETER K10I  ;                                                               
+ PARAMETER KR10  ;                                                               
+ PARAMETER FC10  ;                                                               
+ PARAMETER NC10  ;                                                               
+ PARAMETER F10   ;                                                               
+ PARAMETER KMT10 ;                                                               
+ PARAMETER K1    ;                                                               
+ PARAMETER K3    ;                                                               
+ PARAMETER K4    ;                                                               
+ PARAMETER K2    ;                                                               
+ PARAMETER KMT11 ;                                                               
+ PARAMETER K120  ;                                                               
+ PARAMETER K12I  ;                                                               
+ PARAMETER KR12  ;                                                               
+ PARAMETER FC12  ;                                                               
+ PARAMETER NC12  ;                                                               
+ PARAMETER F12   ;                                                               
+ PARAMETER KMT12 ;                                                               
+ PARAMETER K130  ;                                                               
+ PARAMETER K13I  ;                                                               
+ PARAMETER KR13  ;                                                               
+ PARAMETER FC13  ;                                                               
+ PARAMETER NC13  ;                                                               
+ PARAMETER F13   ;                                                               
+ PARAMETER KMT13 ;                                                               
+ PARAMETER K140  ;                                                               
+ PARAMETER K14I  ;                                                               
+ PARAMETER KR14  ;                                                               
+ PARAMETER FC14  ;                                                               
+ PARAMETER NC14  ;                                                               
+ PARAMETER F14   ;                                                               
+ PARAMETER KMT14 ;                                                               
+ PARAMETER K150  ;                                                               
+ PARAMETER K15I  ;                                                               
+ PARAMETER KR15  ;                                                               
+ PARAMETER FC15  ;                                                               
+ PARAMETER NC15  ;                                                               
+ PARAMETER F15   ;                                                               
+ PARAMETER KMT15 ;                                                               
+ PARAMETER K160  ;                                                               
+ PARAMETER K16I  ;                                                               
+ PARAMETER KR16  ;                                                               
+ PARAMETER FC16  ;                                                               
+ PARAMETER NC16  ;                                                               
+ PARAMETER F16   ;                                                               
+ PARAMETER KMT16 ;                                                               
+ PARAMETER K170  ;                                                               
+ PARAMETER K17I  ;                                                               
+ PARAMETER KR17  ;                                                               
+ PARAMETER FC17  ;                                                               
+ PARAMETER NC17  ;                                                               
+ PARAMETER F17   ;                                                               
+ PARAMETER KMT17 ;                                                               
+ PARAMETER KMT18 ;                                                               
+ PARAMETER KPPN0 ;                                                               
+ PARAMETER KPPNI ;                                                               
+ PARAMETER KRPPN ;                                                               
+ PARAMETER FCPPN ;                                                               
+ PARAMETER NCPPN ;                                                               
+ PARAMETER FPPN  ;                                                               
+ PARAMETER KBPPN ;                                                               
+ PARAMETER O2 N2 H2O dummy RO2;                                                  
+ PARAMETER Treactor TCRDS ;                                                      
+ PARAMTER IPN PAA AA;                                                            
+ PARAMETER KTHNO3L KTHNO3H KTHNO31 KTHNO32 KTHNO3;                               
+ PARAMETER KTNO3 KTO3 KTH2O2;                                                    
+ PARAMETER KTHONOL KTHONOH KTHONO1 KTHONO2 KTHONO;                               
+ PARAMETER KTIPN;                                                                
+                                                                                 
+                                                                                 
+                                                                                 
+ * LOAD CONSTANTS (max.13) ;                                                     
+ PARAMETER <5> INPARAM1;                                                         
+ PARAMETER <8> INPARAM2;                                                         
+ PARAMETER <6> INPARAM3;                                                         
+                                                                                 
+ * ------------- ;                                                               
+ COMPILE GENERAL ;                                                               
+0 LOCN   INSTRUCTION
+ 
+    74:* ------------- ;                                                         
+    74:                                                                          
+    74:CALL rtcnst;                                                              
+    76:RESTART;                                                                  
+    78:                                                                          
+    78:**;                                                                       
+ 
+ NO. OF VARIABLES =   100
+ NO. IMPLICIT     =     0
+ NO. OF ERRORS    =     0
+0SPACE FOR                             IN USE      FREE     TOTAL
+ INTEGER SCALARS AND ARRAYS                47     13625     13672
+ REAL SCALARS AND ARRAYS                  307     13373     13680
+ INDEXES AND SECRETS                       99       400       499
+ CODE ARRAY                                79     13593     13672
+ NAME DICTIONARY                          295       105       400
+ TEXT ARRAY                              3105     10895     14000
+ 
+ 
+ 
+                                                                                 
+ * ------------- ;                                                               
+ COMPILE INITIAL ;                                                               
+0 LOCN   INSTRUCTION
+ 
+    83:* ------------- ;                                                         
+    83:                                                                          
+    83:Read 20 INPARAM1;                                                         
+    88:Read 21 INPARAM2;                                                         
+    93:Read 22 INPARAM3;                                                         
+    98:                                                                          
+    98:T=INPARAM1<0>;                                                            
+   104:P=INPARAM1<1>;                                                            
+   110:*PHOT=INPARAM1<2>;                                                        
+   110:                                                                          
+   110:NormDensity = Loschmidt/Avogadro;                                         
+   119:M = NormDensity * (P/NormPress) * (NormTemp/T);                           
+   139:Mambient = NormDensity * (P/NormPress) * (NormTemp/T);                    
+   159:                                                                          
+   159:*------------------------- ;                                              
+   159:* initilize concentrations ;                                              
+   159:*------------------------- ;                                              
+   159:                                                                          
+   159:* MAIN CONST ;                                                            
+   159:                                                                          
+   159:dummy       = 2.0e-9*M;                                                   
+   168:                                                                          
+   168:HCHO        = 0.0e-9*M;                                                   
+   177:MGLYOX      = 0.0e-9*M;                                                   
+   186:HCOCO       = 0.0e-9*M;                                                   
+   195:CH3NO3      = 0.0e-9*M;                                                   
+   204:C2H5O2      = 0.0e-9*M;                                                   
+   213:NO2         = 1.0e-6*M;                                                   
+   222:CH3OH       = 0.0e-9*M;                                                   
+   231:O1D         = 0.0e-9*M;                                                   
+   240:HCOCO3      = 0.0e-9*M;                                                   
+   249:O3          = 0.0e-9*M;                                                   
+   258:PAN         = 0.0e-9*M;                                                   
+   267:NO3         = 0.0e-9*M;                                                   
+   276:N2O5        = 0.0e-9*M;                                                   
+   285:H2O2        = 0.0e-9*M;                                                   
+   294:NO          = 1.0e-9*M;                                                   
+   303:NA          = 0.0e-9*M;                                                   
+   312:PPN         = 0.0e-9*M;                                                   
+   321:PHAN        = 0.0e-9*M;                                                   
+   330:HOCH2CO3    = 0.0e-9*M;                                                   
+   339:HO2         = 0.0e-9*M;                                                   
+   348:HO2NO2      = 0.0e-9*M;                                                   
+   357:C2H5OH      = 0.0e-9*M;                                                   
+   366:IC3H7NO3    = 0.0e-9*M;                                                   
+   375:HOCH2CHO    = 0.0e-9*M;                                                   
+   384:CH3COCH3    = 0.0e-9*M;                                                   
+   393:CH3COCH2O   = 0.0e-9*M;                                                   
+   402:CH3CO2H     = 0.0e-9*M;                                                   
+   411:HCOCH2O2    = 0.0e-9*M;                                                   
+   420:ETHOHNO3    = 0.0e-9*M;                                                   
+   429:HCOCO3H     = 0.0e-9*M;                                                   
+   438:CO          = 0.0e-9*M;                                                   
+   447:GLYOX       = 0.0e-9*M;                                                   
+   456:PERPROACID  = 0.0e-9*M;                                                   
+   465:HOCH2CH2O2  = 0.0e-9*M;                                                   
+   474:ACETOL      = 0.0e-9*M;                                                   
+   483:PROPACID    = 0.0e-9*M;                                                   
+   492:O           = 0.0e-9*M;                                                   
+   501:HNO3        = 1.0e-8*M;                                                   
+   510:C2H5CO3     = 0.0e-9*M;                                                   
+   519:CH3COCH2O2  = 0.0e-9*M;                                                   
+   528:CH3CO3      = 0.0e-9*M;                                                   
+   537:HOCH2CH2O   = 0.0e-9*M;                                                   
+   546:CH3CHO      = 0.0e-9*M;                                                   
+   555:CH3O        = 0.0e-9*M;                                                   
+   564:IC3H7O      = 0.0e-9*M;                                                   
+   573:HOCH2CO2H   = 0.0e-9*M;                                                   
+   582:C2H5OOH     = 0.0e-9*M;                                                   
+   591:C2H5O       = 0.0e-9*M;                                                   
+   600:HOCH2CO3H   = 0.0e-9*M;                                                   
+   609:OH          = 0.0e-9*M;                                                   
+   618:H2          = 0.0e-9*M;                                                   
+   627:HYPERACET   = 0.0e-9*M;                                                   
+   636:HONO        = 0.0e-9*M;                                                   
+   645:ETHGLY      = 0.0e-9*M;                                                   
+   654:C2H5NO3     = 0.0e-9*M;                                                   
+   663:CH3O2NO2    = 0.0e-9*M;                                                   
+   672:HYETHO2H    = 0.0e-9*M;                                                   
+   681:HCOCO2H     = 0.0e-9*M;                                                   
+   690:HCOCH2OOH   = 0.0e-9*M;                                                   
+   699:CH3OOH      = 0.0e-9*M;                                                   
+   708:HCOCH2O     = 0.0e-9*M;                                                   
+   717:SA          = 0.0e-9*M;                                                   
+   726:CH3CO3H     = 0.0e-9*M;                                                   
+   735:CH3O2       = 0.0e-9*M;                                                   
+   744:O2          = 0.2   *M;                                                   
+   753:N2          = 0.8   *M;                                                   
+   762:C4H8        = 0.0e-7*M;                                                   
+   771:*C3H6       = 0.0e-8*M;                                                   
+   771:CHEX        = 0.5e-7*M;                                                   
+   780:                                                                          
+   780:                                                                          
+   780:T = INPARAM1<0>;                                                          
+   786:p = INPARAM1<1>;                                                          
+   792:Treactor = INPARAM1<2>;                                                   
+   798:TCRDS = INPARAM1<3>;                                                      
+   804:WVOH = INPARAM1<4>;                                                       
+   810:                                                                          
+   810:NO = INPARAM2<0>*M;                                                       
+   819:NO2 = INPARAM2<1>*M;                                                      
+   828:H2O = INPARAM2<2>*M;                                                      
+   837:O3 = INPARAM2<3>*M;                                                       
+   846:H2O2 = INPARAM2<4>*M;                                                     
+   855:HONO = INPARAM2<5>*M;                                                     
+   864:HNO3 = INPARAM2<6>*M;                                                     
+   873:HO2NO2 = INPARAM2<7>*M;                                                   
+   882:                                                                          
+   882:C4H8 = INPARAM3<0>*M;                                                     
+   891:CH3O2NO2 = INPARAM3<1>*M;                                                 
+   900:CHEX = INPARAM3<2>*M;                                                     
+   909:PAA = INPARAM3<3>*M;                                                      
+   918:AA = INPARAM3<4>*M;                                                       
+   927:N2O5 = INPARAM3<5>*M;                                                     
+   936:                                                                          
+   936:                                                                          
+   936:                                                                          
+   936:**;                                                                       
+ 
+ NO. OF VARIABLES =   100
+ NO. IMPLICIT     =     0
+ NO. OF ERRORS    =     0
+0SPACE FOR                             IN USE      FREE     TOTAL
+ INTEGER SCALARS AND ARRAYS                47     13625     13672
+ REAL SCALARS AND ARRAYS                  314     13366     13680
+ INDEXES AND SECRETS                       99       400       499
+ CODE ARRAY                               937     12735     13672
+ NAME DICTIONARY                          295       105       400
+ TEXT ARRAY                              3105     10895     14000
+ 
+ 
+ 
+                                                                                 
+ *------------- ;                                                                
+ COMPILE rtcnst ;                                                                
+0 LOCN   INSTRUCTION
+ 
+   941:*------------- ;                                                          
+   941:                                                                          
+   941:* MAIN RTCNST ;                                                           
+   941:                                                                          
+   941:*RO2 = CH3O2 + IC3H7O2 + NC3H7O2;                                         
+   941:*J1   = PHOT*phi;                                                         
+   941:                                                                          
+   941:                                                                          
+   941:* Generic Rate Coefficients ;                                             
+   941:*;                                                                        
+   941:KRO2NO = 2.7D-12*EXP(360/T) ;                                             
+   955:KRO2HO2 = 2.91D-13*EXP(1300/T) ;                                          
+   969:KAPHO2 = 5.2D-13*EXP(980/T) ;                                             
+   983:KAPNO = 7.5D-12*EXP(290/T) ;                                              
+   997:KRO2NO3 = 2.3D-12 ;                                                       
+  1003:KNO3AL = 1.4D-12*EXP(-1860/T) ;                                           
+  1018:KDEC = 1.00D+06 ;                                                         
+  1024:KROPRIM = 2.50D-14*EXP(-300/T) ;                                          
+  1039:KROSEC = 2.50D-14*EXP(-300/T) ;                                           
+  1054:KCH3O2 = 1.03D-13*EXP(365/T) ;                                            
+  1068:K298CH3O2 = 3.5D-13 ;                                                     
+  1074:K14ISOM1 = 3.00D7*EXP(-5300/T) ;                                          
+  1089:*;                                                                        
+  1089:* Complex reactions ;                                                     
+  1089:*;                                                                        
+  1089:KD0 = 1.10D-05*M*EXP(-10100/T) ;                                          
+  1107:KDI = 1.90D17*EXP(-14100/T) ;                                             
+  1122:KRD = KD0/KDI ;                                                           
+  1131:FCD = 0.30 ;                                                              
+  1137:NCD = 0.75-1.27*(LOG10(FCD)) ;                                            
+  1152:FD = 10@(LOG10(FCD)/(1+(LOG10(KRD)/NCD)**2)) ;                            
+  1177:KBPAN = (KD0*KDI)*FD/(KD0+KDI) ;                                          
+  1196:KC0 = 3.28D-28*M*(T/300)@-6.87 ;                                          
+  1217:KCI = 1.125D-11*(T/300)@-1.105 ;                                          
+  1235:KRC = KC0/KCI ;                                                           
+  1244:FCC = 0.30 ;                                                              
+  1250:NC = 0.75-1.27*(LOG10(FCC)) ;                                             
+  1265:FC = 10@(LOG10(FCC)/(1+(LOG10(KRC)/NC)**2)) ;                             
+  1290:KFPAN = (KC0*KCI)*FC/(KC0+KCI) ;                                          
+  1309:K10 = 1.0D-31*M*(T/300)@-1.6 ;                                            
+  1330:K1I = 5.0D-11*(T/300)@-0.3 ;                                              
+  1348:KR1 = K10/K1I ;                                                           
+  1357:FC1 = 0.85 ;                                                              
+  1363:NC1 = 0.75-1.27*(LOG10(FC1)) ;                                            
+  1378:F1 = 10@(LOG10(FC1)/(1+(LOG10(KR1)/NC1)**2)) ;                            
+  1403:KMT01 = (K10*K1I)*F1/(K10+K1I) ;                                          
+  1422:K20 = 1.3D-31*M*(T/300)@-1.5 ;                                            
+  1443:K2I = 2.3D-11*(T/300)@0.24 ;                                              
+  1459:KR2 = K20/K2I ;                                                           
+  1468:FC2 = 0.6 ;                                                               
+  1474:NC2 = 0.75-1.27*(LOG10(FC2)) ;                                            
+  1489:F2 = 10@(LOG10(FC2)/(1+(LOG10(KR2)/NC2)**2)) ;                            
+  1514:KMT02 = (K20*K2I)*F2/(K20+K2I) ;                                          
+  1533:K30 = 3.6D-30*M*(T/300)@-4.1 ;                                            
+  1554:K3I = 1.9D-12*(T/300)@0.2 ;                                               
+  1570:KR3 = K30/K3I ;                                                           
+  1579:FC3 = 0.35 ;                                                              
+  1585:NC3 = 0.75-1.27*(LOG10(FC3)) ;                                            
+  1600:F3 = 10@(LOG10(FC3)/(1+(LOG10(KR3)/NC3)**2)) ;                            
+  1625:KMT03 = (K30*K3I)*F3/(K30+K3I) ;                                          
+  1644:K40 = 1.3D-3*M*(T/300)@-3.5*EXP(-11000/T) ;                               
+  1674:K4I = 9.7D+14*(T/300)@0.1*EXP(-11080/T) ;                                 
+  1699:KR4 = K40/K4I ;                                                           
+  1708:FC4 = 0.35 ;                                                              
+  1714:NC4 = 0.75-1.27*(LOG10(FC4)) ;                                            
+  1729:F4 = 10@(LOG10(FC4)/(1+(LOG10(KR4)/NC4)**2)) ;                            
+  1754:KMT04 = (K40*K4I)*F4/(K40+K4I) ;                                          
+  1773:KMT05 = 1.44D-13*(1+(M/4.2D+19)) ;                                        
+  1790:KMT06 = 1 + (1.40D-21*EXP(2200/T)*H2O) ;                                  
+  1811:K70 = 7.4D-31*M*(T/300)@-2.4 ;                                            
+  1832:K7I = 3.3D-11*(T/300)@-0.3 ;                                              
+  1850:KR7 = K70/K7I ;                                                           
+  1859:FC7 = 0.81 ;                                                              
+  1865:NC7 = 0.75-1.27*(LOG10(FC7)) ;                                            
+  1880:F7 = 10@(LOG10(FC7)/(1+(LOG10(KR7)/NC7)**2)) ;                            
+  1905:KMT07 = (K70*K7I)*F7/(K70+K7I) ;                                          
+  1924:K80 = 3.2D-30*M*(T/300)@-4.5 ;                                            
+  1945:K8I = 3.0D-11 ;                                                           
+  1951:KR8 = K80/K8I ;                                                           
+  1960:FC8 = 0.41 ;                                                              
+  1966:NC8 = 0.75-1.27*(LOG10(FC8)) ;                                            
+  1981:F8 = 10@(LOG10(FC8)/(1+(LOG10(KR8)/NC8)**2)) ;                            
+  2006:KMT08 = (K80*K8I)*F8/(K80+K8I) ;                                          
+  2025:K90 = 1.4D-31*M*(T/300)@-3.1 ;                                            
+  2046:K9I = 4.0D-12 ;                                                           
+  2052:KR9 = K90/K9I ;                                                           
+  2061:FC9 = 0.4 ;                                                               
+  2067:NC9 = 0.75-1.27*(LOG10(FC9)) ;                                            
+  2082:F9 = 10@(LOG10(FC9)/(1+(LOG10(KR9)/NC9)**2)) ;                            
+  2107:KMT09 = (K90*K9I)*F9/(K90+K9I) ;                                          
+  2126:K100 = 4.10D-05*M*EXP(-10650/T) ;                                         
+  2144:K10I = 6.0D+15*EXP(-11170/T) ;                                            
+  2159:KR10 = K100/K10I ;                                                        
+  2168:FC10 = 0.4 ;                                                              
+  2174:NC10 = 0.75-1.27*(LOG10(FC10)) ;                                          
+  2189:F10 = 10@(LOG10(FC10)/(1+(LOG10(KR10)/NC10)**2)) ;                        
+  2214:KMT10 = (K100*K10I)*F10/(K100+K10I) ;                                     
+  2233:K1 = 2.40D-14*EXP(460/T) ;                                                
+  2247:K3 = 6.50D-34*EXP(1335/T) ;                                               
+  2261:K4 = 2.70D-17*EXP(2199/T) ;                                               
+  2275:K2 = (K3*M)/(1+(K3*M/K4)) ;                                               
+  2298:KMT11 = K1 + K2 ;                                                         
+  2307:K120 = 2.5D-31*M*(T/300)@-2.6 ;                                           
+  2328:K12I = 2.0D-12 ;                                                          
+  2334:KR12 = K120/K12I ;                                                        
+  2343:FC12 = 0.53 ;                                                             
+  2349:NC12 = 0.75-1.27*(LOG10(FC12)) ;                                          
+  2364:F12 = 10@(LOG10(FC12)/(1.0+(LOG10(KR12)/NC12)**2)) ;                      
+  2389:KMT12 = (K120*K12I*F12)/(K120+K12I) ;                                     
+  2408:K130 = 2.5D-30*M*(T/300)@-5.5 ;                                           
+  2429:K13I = 1.8D-11 ;                                                          
+  2435:KR13 = K130/K13I ;                                                        
+  2444:FC13 = 0.36 ;                                                             
+  2450:NC13 = 0.75-1.27*(LOG10(FC13)) ;                                          
+  2465:F13 = 10@(LOG10(FC13)/(1+(LOG10(KR13)/NC13)**2)) ;                        
+  2490:KMT13 = (K130*K13I)*F13/(K130+K13I) ;                                     
+  2509:K140 = 9.0D-5*EXP(-9690/T)*M ;                                            
+  2527:K14I = 1.1D+16*EXP(-10560/T) ;                                            
+  2542:KR14 = K140/K14I ;                                                        
+  2551:FC14 = 0.36 ;                                                             
+  2557:NC14 = 0.75-1.27*(LOG10(FC14)) ;                                          
+  2572:F14 = 10@(LOG10(FC14)/(1+(LOG10(KR14)/NC14)**2)) ;                        
+  2597:KMT14 = (K140*K14I)*F14/(K140+K14I) ;                                     
+  2616:K150 = 8.6D-29*M*(T/300)@-3.1 ;                                           
+  2637:K15I = 9.0D-12*(T/300)@-0.85 ;                                            
+  2655:KR15 = K150/K15I ;                                                        
+  2664:FC15 = 0.48 ;                                                             
+  2670:NC15 = 0.75-1.27*(LOG10(FC15)) ;                                          
+  2685:F15 = 10@(LOG10(FC15)/(1+(LOG10(KR15)/NC15)**2)) ;                        
+  2710:KMT15 = (K150*K15I)*F15/(K150+K15I) ;                                     
+  2729:K160 = 8.0D-27*M*(T/300)@-3.5 ;                                           
+  2750:K16I = 3.0D-11*(T/300)@-1 ;                                               
+  2768:KR16 = K160/K16I ;                                                        
+  2777:FC16 = 0.5 ;                                                              
+  2783:NC16 = 0.75-1.27*(LOG10(FC16)) ;                                          
+  2798:F16 = 10@(LOG10(FC16)/(1+(LOG10(KR16)/NC16)**2)) ;                        
+  2823:KMT16 = (K160*K16I)*F16/(K160+K16I) ;                                     
+  2842:K170 = 5.0D-30*M*(T/300)@-1.5 ;                                           
+  2863:K17I = 1.0D-12 ;                                                          
+  2869:KR17 = K170/K17I ;                                                        
+  2878:FC17 = 0.17*EXP(-51/T)+EXP(-T/204) ;                                      
+  2902:NC17 = 0.75-1.27*(LOG10(FC17)) ;                                          
+  2917:F17 = 10@(LOG10(FC17)/(1.0+(LOG10(KR17)/NC17)**2)) ;                      
+  2942:KMT17 = (K170*K17I*F17)/(K170+K17I) ;                                     
+  2961:KMT18 = 9.5D-39*O2*EXP(5270/T)/(1+7.5D-29*O2*EXP(5610/T)) ;               
+  2997:KPPN0 = 1.7D-03*EXP(-11280/T)*M ;                                         
+  3015:KPPNI = 8.3D+16*EXP(-13940/T) ;                                           
+  3030:KRPPN = KPPN0/KPPNI ;                                                     
+  3039:FCPPN = 0.36 ;                                                            
+  3045:NCPPN = 0.75-1.27*(LOG10(FCPPN)) ;                                        
+  3060:FPPN = 10@(LOG10(FCPPN)/(1+(LOG10(KRPPN)/NCPPN)**2)) ;                    
+  3085:KBPPN = (KPPN0*KPPNI)*FCPPN/(KPPN0+KPPNI) ;                               
+  3104:                                                                          
+  3104:KTHNO3L = 1.82D-4*(T/298)@(-1.98)*EXP(-24004/T);                          
+  3131:KTHNO3H = 2.0D+15*EXP(-24658/T);                                          
+  3146:KTHNO31 = ((KTHNO3L * M)/(1+KTHNO3L*M/KTHNO3H));                          
+  3169:KTHNO32 = 0.6@(1+(LOG10(KTHNO3L*M/KTHNO3H))@2)@(-1);                      
+  3198:KTHNO3   = KTHNO31 * KTHNO32;                                             
+  3207:                                                                          
+  3207:KTNO3 = 1.0D-2*(T/298)@9*EXP(-1500/T);                                    
+  3232:KTO3 = 7.16e-10*EXP(-11200/T);                                            
+  3247:KTH2O2 = 2.03e-3*(T/298)@(-4.86)*EXP(-26820/T);                           
+  3274:                                                                          
+  3274:KTHONOL = 1.98D-7*(T/298)@(-3.8)*EXP(-25257/T);                           
+  3301:KTHONOH = 1.09D+16*(T/298)@(-1.23)*EXP(-25016/T);                         
+  3328:KTHONO1 = KTHONOL*M/KTHONOH;                                              
+  3340:KTHONO2 = (1+(LOG10(KTHONO1))@2)@(-1);                                    
+  3359:KTHONO = (KTHONOL/(1+KTHONO1))*0.6@KTHONO2;                               
+  3379:KTIPN = 3.16D16*EXP(-20129/T);                                            
+  3394:**;                                                                       
+ 
+ NO. OF VARIABLES =   100
+ NO. IMPLICIT     =     0
+ NO. OF ERRORS    =     0
+0SPACE FOR                             IN USE      FREE     TOTAL
+ INTEGER SCALARS AND ARRAYS                48     13624     13672
+ REAL SCALARS AND ARRAYS                  445     13235     13680
+ INDEXES AND SECRETS                       99       400       499
+ CODE ARRAY                              3395     10277     13672
+ NAME DICTIONARY                          295       105       400
+ TEXT ARRAY                              3105     10895     14000
+ 
+ 
+ 
+                                                                                 
+                                                                                 
+ * --------------- ;                                                             
+ COMPILE EQUATIONS ;                                                             
+0 LOCN   INSTRUCTION
+ 
+0*****    EQUATION FIXES MAX. NO. OF VARIABLES AS   100
+ 
+  3408:* --------------- ;                                                       
+  3408:                                                                          
+  3408:* MAIN EQUATIONS ;                                                        
+  3408:                                                                          
+  3408:*  ;                                                                      
+  3408:RO2 = CH3CO3 + C2H5CO3 + CH3O2 + CH3COCH2O2 + HCOCH2O2 + C2H5O2 +         
+  3408:      HOCH2CO3 + HOCH2CH2O2 + HCOCO3 ;                                    
+  3438:*;                                                                        
+  3438:* Reaction definitions. ;                                                 
+  3438:*;                                                                        
+  3438:% 5.6D-34*N2*(T/300)@-2.6*O2 : O = O3 ;                                   
+  3469:% 6.0D-34*O2*(T/300)@-2.6*O2 : O = O3 ;                                   
+  3500:% 8.0D-12*EXP(-2060/T) : O + O3 = ;                                       
+  3522:% KMT01 : O + NO = NO2 ;                                                  
+  3538:% 5.5D-12*EXP(188/T) : O + NO2 = NO ;                                     
+  3562:% KMT02 : O + NO2 = NO3 ;                                                 
+  3578:% 3.2D-11*EXP(67/T)*O2 : O1D = O ;                                        
+  3602:% 2.0D-11*EXP(130/T)*N2 : O1D = O ;                                       
+  3626:% 1.4D-12*EXP(-1310/T) : NO + O3 = NO2 ;                                  
+  3651:% 1.4D-13*EXP(-2470/T) : NO2 + O3 = NO3 ;                                 
+  3676:% 3.3D-39*EXP(530/T)*O2 : NO + NO = NO2 + NO2 ;                           
+  3706:% 1.8D-11*EXP(110/T) : NO + NO3 = NO2 + NO2 ;                             
+  3733:% 4.50D-14*EXP(-1260/T) : NO2 + NO3 = NO + NO2 ;                          
+  3761:% KMT03 : NO2 + NO3 = N2O5 ;                                              
+  3777:% 2.14D-10*H2O : O1D = OH + OH ;                                          
+  3796:% 1.70D-12*EXP(-940/T) : OH + O3 = HO2 ;                                  
+  3821:% 7.7D-12*EXP(-2100/T) : OH + H2 = HO2 ;                                  
+  3846:% KMT05 : OH + CO = HO2 ;                                                 
+  3862:% 2.9D-12*EXP(-160/T) : OH + H2O2 = HO2 ;                                 
+  3887:% 2.03D-16*(T/300)@4.57*EXP(693/T) : HO2 + O3 = OH ;                      
+  3921:% 4.8D-11*EXP(250/T) : OH + HO2 = ;                                       
+  3942:% 2.20D-13*KMT06*EXP(600/T) : HO2 + HO2 = H2O2 ;                          
+  3969:% 1.90D-33*M*KMT06*EXP(980/T) : HO2 + HO2 = H2O2 ;                        
+  3999:% KMT07 : OH + NO = HONO ;                                                
+  4015:% KMT08 : OH + NO2 = HNO3 ;                                               
+  4031:% 2.0D-11 : OH + NO3 = HO2 + NO2 ;                                        
+  4050:% 3.45D-12*EXP(270/T) : HO2 + NO = OH + NO2 ;                             
+  4077:% KMT09 : HO2 + NO2 = HO2NO2 ;                                            
+  4093:% 3.2D-13*EXP(690/T)*1.0 : OH + HO2NO2 = NO2 ;                            
+  4120:% 4.0D-12 : HO2 + NO3 = OH + NO2 ;                                        
+  4139:% 2.5D-12*EXP(260/T) : OH + HONO = NO2 ;                                  
+  4163:% KMT11 : OH + HNO3 = NO3 ;                                               
+  4179:% 4.0D-32*EXP(-1000/T)*M : O + SO2 = SO3 ;                                
+  4207:% KMT12 : OH + SO2 = HSO3 ;                                               
+  4223:% 1.3D-12*EXP(-330/T)*O2 : HSO3 = HO2 + SO3 ;                             
+  4251:% 6.00D-06 : HNO3 = NA ;                                                  
+  4264:% 4.00D-04 : N2O5 = NA + NA ;                                             
+  4280:% 1.20D-15*H2O : SO3 = SA ;                                               
+  4296:*% J<1> : O3 = O1D ;                                                      
+  4296:*% J<2> : O3 = O ;                                                        
+  4296:*% J<3> : H2O2 = OH + OH ;                                                
+  4296:*% J<4> : NO2 = NO + O ;                                                  
+  4296:*% J<5> : NO3 = NO ;                                                      
+  4296:*% J<6> : NO3 = NO2 + O ;                                                 
+  4296:*% J<7> : HONO = OH + NO ;                                                
+  4296:*% J<8> : HNO3 = OH + NO2 ;                                               
+  4296:% KMT04 : N2O5 = NO2 + NO3 ;                                              
+  4312:% KMT10 : HO2NO2 = HO2 + NO2 ;                                            
+  4328:% 3D-14 : PAN + OH = HCHO + CO + NO2 ;                                    
+  4350:% KBPAN : PAN = CH3CO3 + NO2 ;                                            
+  4366:*% J<54> : IC3H7NO3 = IC3H7O + NO2 ;                                      
+  4366:% 6.2D-13*EXP(-230/T) : OH + IC3H7NO3 = CH3COCH3 + NO2 ;                  
+  4394:% 1.27D-12 : PPN + OH = CH3CHO + CO + NO2 ;                               
+  4416:% KBPPN : PPN = C2H5CO3 + NO2 ;                                           
+  4432:% KMT14 : CH3O2NO2 = CH3O2 + NO2 ;                                        
+  4448:*% J<52> : C2H5NO3 = C2H5O + NO2 ;                                        
+  4448:% 6.7D-13*EXP(-395/T) : OH + C2H5NO3 = CH3CHO + NO2 ;                     
+  4476:*% J<11> : HCHO = CO + HO2 + HO2 ;                                        
+  4476:*% J<12> : HCHO = H2 + CO ;                                               
+  4476:% 5.5D-16 : NO3 + HCHO = HNO3 + CO + HO2 ;                                
+  4498:% 5.4D-12*EXP(135/T) : OH + HCHO = HO2 + CO ;                             
+  4525:% KAPHO2*0.15 : CH3CO3 + HO2 = CH3CO2H + O3 ;                             
+  4547:% KAPHO2*0.41 : CH3CO3 + HO2 = CH3CO3H ;                                  
+  4566:% KAPHO2*0.44 : CH3CO3 + HO2 = CH3O2 + OH ;                               
+  4588:% 7.5D-12*EXP(290/T) : CH3CO3 + NO = NO2 + CH3O2 ;                        
+  4615:% KFPAN : CH3CO3 + NO2 = PAN ;                                            
+  4631:% 4.0D-12 : CH3CO3 + NO3 = NO2 + CH3O2 ;                                  
+  4650:% 1.00D-11*0.3*RO2 : CH3CO3 = CH3CO2H ;                                   
+  4669:% 1.00D-11*0.7*RO2 : CH3CO3 = CH3O2 ;                                     
+  4688:% 1.5D-14*EXP(-230/T)*O2 : IC3H7O = CH3COCH3 + HO2 ;                      
+  4716:% 8.8D-12*EXP(-1320/T) + 1.7D-14*EXP(423/T) : CH3COCH3 + OH =             
+  4716:CH3COCH2O2 ;                                                              
+  4753:*% J<21> : CH3COCH3 = CH3CO3 + CH3O2 ;                                    
+  4753:*% J<13> : CH3CHO = CH3O2 + HO2 + CO ;                                    
+  4753:% 1.4D-12*EXP(-1860/T) : NO3 + CH3CHO = HNO3 + CH3CO3 ;                   
+  4781:% 4.7D-12*EXP(345/T)*0.95 : OH + CH3CHO = CH3CO3 ;                        
+  4808:% 4.7D-12*EXP(345/T)*0.05 : OH + CH3CHO = HCOCH2O2 ;                      
+  4835:% KAPHO2*0.44 : C2H5CO3 + HO2 = C2H5O2 + OH ;                             
+  4857:% KAPHO2*0.41 : C2H5CO3 + HO2 = PERPROACID ;                              
+  4876:% KAPHO2*0.15 : C2H5CO3 + HO2 = PROPACID + O3 ;                           
+  4898:% 6.7D-12*EXP(340/T) : C2H5CO3 + NO = NO2 + C2H5O2 ;                      
+  4925:% KFPAN : C2H5CO3 + NO2 = PPN ;                                           
+  4941:% KRO2NO3*1.74 : C2H5CO3 + NO3 = C2H5O2 + NO2 ;                           
+  4963:% 1.00D-11*0.7*RO2 : C2H5CO3 = C2H5O2 ;                                   
+  4982:% 1.00D-11*0.3*RO2 : C2H5CO3 = PROPACID ;                                 
+  5001:% 3.8D-13*EXP(780/T)*(1-1/(1+498*EXP(-1160/T))) : CH3O2 + HO2 =           
+  5001:CH3OOH ;                                                                  
+  5050:% 3.8D-13*EXP(780/T)*(1/(1+498*EXP(-1160/T))) : CH3O2 + HO2 =             
+  5050:HCHO ;                                                                    
+  5095:% 2.3D-12*EXP(360/T)*0.001 : CH3O2 + NO = CH3NO3 ;                        
+  5122:% 2.3D-12*EXP(360/T)*0.999 : CH3O2 + NO = CH3O + NO2 ;                    
+  5152:% KMT13 : CH3O2 + NO2 = CH3O2NO2 ;                                        
+  5168:% 1.2D-12 : CH3O2 + NO3 = CH3O + NO2 ;                                    
+  5187:% 2*KCH3O2*RO2*7.18*EXP(-885/T) : CH3O2 = CH3O ;                          
+  5218:% 2*KCH3O2*RO2*0.5*(1-7.18*EXP(-885/T)) : CH3O2 = CH3OH ;                 
+  5257:% 2*KCH3O2*RO2*0.5*(1-7.18*EXP(-885/T)) : CH3O2 = HCHO ;                  
+  5296:% 2.4D-14*EXP(-325/T)*O2 : C2H5O = CH3CHO + HO2 ;                         
+  5324:% 8.00D-13 : CH3CO2H + OH = CH3O2 ;                                       
+  5340:% 3.70D-12 : CH3CO3H + OH = CH3CO3 ;                                      
+  5356:*% J<41> : CH3CO3H = CH3O2 + OH ;                                         
+  5356:% 1.36D-13*EXP(1250/T)*0.15 : CH3COCH2O2 + HO2 = CH3COCH2O + OH ;         
+  5386:% 1.36D-13*EXP(1250/T)*0.85 : CH3COCH2O2 + HO2 = HYPERACET ;              
+  5413:% KRO2NO : CH3COCH2O2 + NO = CH3COCH2O + NO2 ;                            
+  5432:% KRO2NO3 : CH3COCH2O2 + NO3 = CH3COCH2O + NO2 ;                          
+  5451:% 2*(K298CH3O2*8.0D-12)@0.5*RO2*0.2 : CH3COCH2O2 = ACETOL ;               
+  5480:% 2*(K298CH3O2*8.0D-12)@0.5*RO2*0.6 : CH3COCH2O2 = CH3COCH2O ;            
+  5509:% 2*(K298CH3O2*8.0D-12)@0.5*RO2*0.2 : CH3COCH2O2 = MGLYOX ;               
+  5538:% KRO2HO2*0.387 : HCOCH2O2 + HO2 = HCOCH2OOH ;                            
+  5557:% KRO2NO : HCOCH2O2 + NO = NO2 + HCOCH2O ;                                
+  5576:% KRO2NO3 : HCOCH2O2 + NO3 = HCOCH2O + NO2 ;                              
+  5595:% 2.00D-12*0.2*RO2 : HCOCH2O2 = GLYOX ;                                   
+  5614:% 2.00D-12*0.6*RO2 : HCOCH2O2 = HCOCH2O ;                                 
+  5633:% 2.00D-12*0.2*RO2 : HCOCH2O2 = HOCH2CHO ;                                
+  5652:% 4.3D-13*EXP(870/T) : C2H5O2 + HO2 = C2H5OOH ;                           
+  5676:% 2.55D-12*EXP(380/T)*0.009 : C2H5O2 + NO = C2H5NO3 ;                     
+  5703:% 2.55D-12*EXP(380/T)*0.991 : C2H5O2 + NO = C2H5O + NO2 ;                 
+  5733:% KRO2NO3 : C2H5O2 + NO3 = C2H5O + NO2 ;                                  
+  5752:% 2*(KCH3O2*6.4D-14)@0.5*RO2*0.6 : C2H5O2 = C2H5O ;                       
+  5781:% 2*(KCH3O2*6.4D-14)@0.5*RO2*0.2 : C2H5O2 = C2H5OH ;                      
+  5810:% 2*(KCH3O2*6.4D-14)@0.5*RO2*0.2 : C2H5O2 = CH3CHO ;                      
+  5839:% 4.42D-12 : PERPROACID + OH = C2H5CO3 ;                                  
+  5855:*% J<41> : PERPROACID = C2H5O2 + OH ;                                     
+  5855:% 1.2D-12 : PROPACID + OH = C2H5O2 ;                                      
+  5871:*% J<41> : CH3OOH = CH3O + OH ;                                           
+  5871:% 5.3D-12*EXP(190/T)*0.6 : OH + CH3OOH = CH3O2 ;                          
+  5898:% 5.3D-12*EXP(190/T)*0.4 : OH + CH3OOH = HCHO + OH ;                      
+  5928:*% J<51> : CH3NO3 = CH3O + NO2 ;                                          
+  5928:% 4.0D-13*EXP(-845/T) : OH + CH3NO3 = HCHO + NO2 ;                        
+  5956:% 7.2D-14*EXP(-1080/T)*O2 : CH3O = HCHO + HO2 ;                           
+  5984:% 2.85D-12*EXP(-345/T) : CH3OH + OH = HO2 + HCHO ;                        
+  6012:% KDEC : CH3COCH2O = CH3CO3 + HCHO ;                                      
+  6028:% 1.90D-12*EXP(190/T) : HYPERACET + OH = CH3COCH2O2 ;                     
+  6052:% 8.39D-12 : HYPERACET + OH = MGLYOX + OH ;                               
+  6071:*% J<22> : HYPERACET = CH3CO3 + HCHO + OH ;                               
+  6071:*% J<41> : HYPERACET = CH3COCH2O + OH ;                                   
+  6071:% 1.6D-12*EXP(305/T) : ACETOL + OH = MGLYOX + HO2 ;                       
+  6098:*% J<22> : ACETOL = CH3CO3 + HCHO + HO2 ;                                 
+  6098:*% J<34> : MGLYOX = CH3CO3 + CO + HO2 ;                                   
+  6098:% KNO3AL*2.4 : NO3 + MGLYOX = CH3CO3 + CO + HNO3 ;                        
+  6123:% 1.9D-12*EXP(575/T) : OH + MGLYOX = CH3CO3 + CO ;                        
+  6150:% 2.91D-11 : HCOCH2OOH + OH = GLYOX + OH ;                                
+  6169:% 1.90D-12*EXP(190/T) : HCOCH2OOH + OH = HCOCH2O2 ;                       
+  6193:*% J<41> : HCOCH2OOH = HCOCH2O + OH ;                                     
+  6193:*% J<15> : HCOCH2OOH = HO2 + CO + HCHO + OH ;                             
+  6193:% KDEC : HCOCH2O = HCHO + CO + HO2 ;                                      
+  6212:*% J<31> : GLYOX = CO + CO + H2 ;                                         
+  6212:*% J<33> : GLYOX = CO + CO + HO2 + HO2 ;                                  
+  6212:*% J<32> : GLYOX = HCHO + CO ;                                            
+  6212:% KNO3AL : NO3 + GLYOX = HCOCO + HNO3 ;                                   
+  6231:% 3.1D-12*EXP(340/T) : OH + GLYOX = HCOCO ;                               
+  6255:% KNO3AL : HOCH2CHO + NO3 = HOCH2CO3 + HNO3 ;                             
+  6274:% 1.00D-11*0.200 : HOCH2CHO + OH = GLYOX + HO2 ;                          
+  6296:% 1.00D-11*0.800 : HOCH2CHO + OH = HOCH2CO3 ;                             
+  6315:*% J<15> : HOCH2CHO = HO2 + HCHO + HO2 + CO ;                             
+  6315:*% J<41> : C2H5OOH = C2H5O + OH ;                                         
+  6315:% 1.90D-12*EXP(190/T) : OH + C2H5OOH = C2H5O2 ;                           
+  6339:% 8.01D-12 : OH + C2H5OOH = CH3CHO + OH ;                                 
+  6358:% 3.0D-12*EXP(20/T)*0.05 : C2H5OH + OH = C2H5O ;                          
+  6385:% 3.0D-12*EXP(20/T)*0.9 : C2H5OH + OH = CH3CHO + HO2 ;                    
+  6415:% 3.0D-12*EXP(20/T)*0.05 : C2H5OH + OH = HOCH2CH2O2 ;                     
+  6442:% 7.00D11*EXP(-3160/T) : HCOCO = CO + CO + HO2 ;                          
+  6470:% 5.00D-12*O2 : HCOCO = CO + CO + HO2 ;                                   
+  6492:% 5.00D-12*O2*3.2*(1-EXP(-550/T)) : HCOCO = CO + OH ;                     
+  6527:% 5.00D-12*O2*3.2*EXP(-550/T) : HCOCO = HCOCO3 ;                          
+  6555:% KAPHO2*0.44 : HOCH2CO3 + HO2 = HO2 + HCHO + OH ;                        
+  6580:% KAPHO2*0.15 : HOCH2CO3 + HO2 = HOCH2CO2H + O3 ;                         
+  6602:% KAPHO2*0.41 : HOCH2CO3 + HO2 = HOCH2CO3H ;                              
+  6621:% KAPNO : HOCH2CO3 + NO = NO2 + HO2 + HCHO ;                              
+  6643:% KFPAN : HOCH2CO3 + NO2 = PHAN ;                                         
+  6659:% KRO2NO3*1.74 : HOCH2CO3 + NO3 = NO2 + HO2 + HCHO ;                      
+  6684:% 1.00D-11*0.7*RO2 : HOCH2CO3 = HCHO + HO2 ;                              
+  6706:% 1.00D-11*0.3*RO2 : HOCH2CO3 = HOCH2CO2H ;                               
+  6725:% 1.53D-13*EXP(1300/T) : HOCH2CH2O2 + HO2 = HYETHO2H ;                    
+  6749:% KRO2NO*0.005 : HOCH2CH2O2 + NO = ETHOHNO3 ;                             
+  6768:% KRO2NO*0.995 : HOCH2CH2O2 + NO = HOCH2CH2O + NO2 ;                      
+  6790:% KRO2NO3 : HOCH2CH2O2 + NO3 = HOCH2CH2O + NO2 ;                          
+  6809:% 2*(KCH3O2*7.8D-14*EXP(1000/T))@0.5*RO2*0.2 : HOCH2CH2O2 = ETHGLY        
+  6809:;                                                                         
+  6846:% 2*(KCH3O2*7.8D-14*EXP(1000/T))@0.5*RO2*0.6 : HOCH2CH2O2 =               
+  6846:HOCH2CH2O ;                                                               
+  6883:% 2*(KCH3O2*7.8D-14*EXP(1000/T))@0.5*RO2*0.2 : HOCH2CH2O2 =               
+  6883:HOCH2CHO ;                                                                
+  6920:% KAPHO2*0.15 : HCOCO3 + HO2 = HCOCO2H + O3 ;                             
+  6942:% KAPHO2*0.41 : HCOCO3 + HO2 = HCOCO3H ;                                  
+  6961:% KAPHO2*0.44 : HCOCO3 + HO2 = HO2 + CO + OH ;                            
+  6986:% KAPNO : HCOCO3 + NO = HO2 + CO + NO2 ;                                  
+  7008:% KFPAN : HCOCO3 + NO2 = HO2 + CO + NO3 ;                                 
+  7030:% KRO2NO3*1.74 : HCOCO3 + NO3 = HO2 + CO + NO2 ;                          
+  7055:% 1.00D-11*0.7*RO2 : HCOCO3 = CO + HO2 ;                                  
+  7077:% 1.00D-11*0.3*RO2 : HCOCO3 = HCOCO2H ;                                   
+  7096:% 2.73D-12 : HOCH2CO2H + OH = HCHO + HO2 ;                                
+  7115:% 6.19D-12 : HOCH2CO3H + OH = HOCH2CO3 ;                                  
+  7131:*% J<41> : HOCH2CO3H = HCHO + HO2 + OH ;                                  
+  7131:% 1.12D-12 : PHAN + OH = HCHO + CO + NO2 ;                                
+  7153:% KBPAN : PHAN = HOCH2CO3 + NO2 ;                                         
+  7169:% 1.90D-12*EXP(190/T) : HYETHO2H + OH = HOCH2CH2O2 ;                      
+  7193:% 1.38D-11 : HYETHO2H + OH = HOCH2CHO + OH ;                              
+  7212:*% J<41> : HYETHO2H = HOCH2CH2O + OH ;                                    
+  7212:% 8.40D-13 : ETHOHNO3 + OH = HOCH2CHO + NO2 ;                             
+  7231:% 9.50D+13*EXP(-5988/T) : HOCH2CH2O = HO2 + HCHO + HCHO ;                 
+  7259:% KROPRIM*O2 : HOCH2CH2O = HO2 + HOCH2CHO ;                               
+  7278:% 1.45D-11 : ETHGLY + OH = HOCH2CHO + HO2 ;                               
+  7297:*% J<34> : HCOCO2H = HO2 + HO2 + CO ;                                     
+  7297:% 1.23D-11 : OH + HCOCO2H = CO + HO2 ;                                    
+  7316:*% J<41> : HCOCO3H = HO2 + CO + OH ;                                      
+  7316:*% J<15> : HCOCO3H = HO2 + CO + OH ;                                      
+  7316:% 1.58D-11 : OH + HCOCO3H = HCOCO3 ;                                      
+  7332:                                                                          
+  7332:% 1 : dummy = dummy;                                                      
+  7345:% KTHNO3 : HNO3 = OH + NO2;                                               
+  7361:% WVOH : OH = NA;                                                         
+  7374:% KTNO3: NO3 = NO2 + O;                                                   
+  7390:% KTO3 : O3 = O2 + O;                                                     
+  7406:% KTH2O2: H2O2 = OH + OH;                                                 
+  7422:% KTHONO: HONO = OH + NO;                                                 
+  7438:% KTIPN : IC3H7NO3 = IC3H7O + NO2;                                        
+  7454:                                                                          
+  7454:*Butene reactions ;                                                       
+  7454:*% 3.2D-13*EXP(-950/T)*0.65 : C4H8 + NO3 = BU1ENO3O2 ;                    
+  7454:*% 3.2D-13*EXP(-950/T)*0.35 : C4H8 + NO3 = C43NO34O2 ;                    
+  7454:*% 3.55D-15*EXP(-1745/T)*0.5 : C4H8 + O3 = C2H5CHOOA + HCHO ;             
+  7454:*% 3.55D-15*EXP(-1745/T)*0.5 : C4H8 + O3 = CH2OOB + C2H5CHO ;             
+  7454:% 6.6D-12*EXP(465/T)*0.13 : C4H8 + OH = HO3C4O2 ;                         
+  7481:% 6.6D-12*EXP(465/T)*0.87 : C4H8 + OH = NBUTOLAO2 ;                       
+  7508:                                                                          
+  7508:*Secondary butene reactions from OH radicals ;                            
+  7508:% KRO2HO2*0.625 : HO3C4O2 + HO2 = HO3C4OOH ;                              
+  7527:% KRO2NO*0.017 : HO3C4O2 + NO = HO3C4NO3 ;                                
+  7546:% KRO2NO*0.983 : HO3C4O2 + NO = HO3C4O + NO2 ;                            
+  7568:% KRO2NO3 : HO3C4O2 + NO3 = HO3C4O + NO2 ;                                
+  7587:% 2.00D-12*0.2*RO2 : HO3C4O2 = HO3C3CHO ;                                 
+  7606:% 2.00D-12*0.6*RO2 : HO3C4O2 = HO3C4O ;                                   
+  7625:% 2.00D-12*0.2*RO2 : HO3C4O2 = NBUTOLAOH ;                                
+  7644:% KRO2HO2*0.625 : NBUTOLAO2 + HO2 = NBUTOLAOOH ;                          
+  7663:% KRO2NO*0.042 : NBUTOLAO2 + NO = NBUTOLANO3 ;                            
+  7682:% KRO2NO*0.958 : NBUTOLAO2 + NO = NBUTOLAO + NO2 ;                        
+  7704:% KRO2NO3 : NBUTOLAO2 + NO3 = NBUTOLAO + NO2 ;                            
+  7723:% 8.80D-13*0.2*RO2 : NBUTOLAO2 = MEKCOH ;                                 
+  7742:% 8.80D-13*0.6*RO2 : NBUTOLAO2 = NBUTOLAO ;                               
+  7761:% 8.80D-13*0.2*RO2 : NBUTOLAO2 = NBUTOLAOH ;                              
+  7780:                                                                          
+  7780:*Tertiary butene reactions from OH radicals ;                             
+  7780:*% 2.14D-11 : HO3C4OOH + OH = HO3C3CHO + OH ;                             
+  7780:*% 1.90D-12*EXP(190/T) : HO3C4OOH + OH = HO3C4O2 ;                        
+  7780:*% 3.03D-12 : HO3C4NO3 + OH = HO3C3CHO + NO2 ;                            
+  7780:*% 2.00D+14*EXP(-5538/T) : HO3C4O = C2H5CHO + HCHO + HO2 ;                
+  7780:*% KNO3AL*4.0 : HO3C3CHO + NO3 = HO3C3CO3 + HNO3 ;                        
+  7780:*% 3.08D-11 : HO3C3CHO + OH = HO3C3CO3 ;                                  
+  7780:*% 1.59D-11 : NBUTOLAOH + OH = MEKCOH + HO2 ;                             
+  7780:*% 3.01D-11 : NBUTOLAOOH + OH = MEKCOH + OH ;                             
+  7780:*% 1.90D-12*EXP(190/T) : NBUTOLAOOH + OH = NBUTOLAO2 ;                    
+  7780:*% 1.27D-12 : NBUTOLANO3 + OH = MEKCOH + NO2 ;                            
+  7780:*% 2.00D+14*EXP(-6354/T) : NBUTOLAO = C2H5CHO + HCHO + HO2 ;              
+  7780:*% 3.44D-12 : MEKCOH + OH = EGLYOX + HO2 ;                                
+  7780:                                                                          
+  7780:*Propene Reactions ;                                                      
+  7780:*% 3.51D-10*0.87 : C3H6 + OH = HYPROPO2 ;                                 
+  7780:*% 3.51D-10*0.13 : C3H6 + OH = IPROPOLO2 ;                                
+  7780:                                                                          
+  7780:*Secondary propene reactions ;                                            
+  7780:*% KRO2HO2*0.520 : HYPROPO2 + HO2 = HYPROPO2H ;                           
+  7780:*% KRO2NO3 : HYPROPO2 + NO3 = HYPROPO ;                                   
+  7780:*% 8.80D-13*0.2*RO2 : HYPROPO2 = ACETOL ;                                 
+  7780:*% 8.80D-13*0.6*RO2 : HYPROPO2 = HYPROPO ;                                
+  7780:*% 8.80D-13*0.2*RO2 : HYPROPO2 = PROPGLY ;                                
+  7780:*% KRO2NO*0.977 : HYPROPO2 = HYPROPO + NO2 ;                              
+  7780:*% KRO2NO*0.133 : HYPROPO2 = PROPOLNO3 ;                                  
+  7780:*% KRO2HO2*0.520 : IPROPOLO2 + HO2 = IPROPOLO2H ;                         
+  7780:*% KRO2NO*0.991 : IPROPOLO2 + NO = IPROPOLO ;                             
+  7780:*% KRO2NO*0.009 : IPROPOLO2 + NO = PROLNO3 ;                              
+  7780:*% KRO2NO3 : IPROPOLO2 + NO3 = IPROPOLO ;                                 
+  7780:*% 2.00D-12*0.2*RO2 : IPROPOLO2 = CH3CHOHCHO ;                            
+  7780:*% 2.00D-12*0.6*RO2 : IPROPOLO2 = IPROPOLO ;                              
+  7780:*% 2.00D-12*0.2*RO2 : IPROPOLO2 = PROPGLY ;                               
+  7780:                                                                          
+  7780:*Cyclohexane Reactions ;                                                  
+  7780:% 2.88D-17*T@(2)*EXP(309/T) : CHEX + OH = CHEXO2 ;                        
+  7811:                                                                          
+  7811:*Secondary cyclohexane reactions ;                                        
+  7811:% KRO2HO2*0.770 : CHEXO2 + HO2 = CHEXOOH ;                                
+  7830:% KRO2NO*0.078 : CHEXO2 + NO = CHEXNO3 ;                                  
+  7849:% KRO2NO*0.922 : CHEXO2 + NO = CHEXO + NO2;                               
+  7871:% KRO2NO3 : CHEXO2 + NO3 = CHEXO + NO2;                                   
+  7890:% 2.50D-13*0.6*RO2 : CHEXO2 = CHEXO ;                                     
+  7909:% 2.50D-13*0.2*RO2 : CHEXO2 = CYHEXOL ;                                   
+  7928:% 2.50D-13*0.2*RO2 : CHEXO2 = CYHEXONE ;                                  
+  7947:                                                                          
+  7947:**;                                                                       
+ 
+ NO. OF VARIABLES =   100
+ NO. IMPLICIT     =     0
+ NO. OF ERRORS    =     0
+0SPACE FOR                             IN USE      FREE     TOTAL
+ INTEGER SCALARS AND ARRAYS               133     13539     13672
+ REAL SCALARS AND ARRAYS                 1742     11938     13680
+ INDEXES AND SECRETS                       99       400       499
+ CODE ARRAY                              7948      5724     13672
+ NAME DICTIONARY                          303        97       400
+ TEXT ARRAY                              3185     10815     14000
+ 
+ 
+ 
+                                                                                 
+ WHENEVER                                                                        
+ 1) TIME = 0     + 0.005 * 2100   % CALL BLOCK 3;  *chemistry in sample l        
+ 2) TIME = 0.3495                     CALL BLOCK 4 RESTART;   * heating          
+ 3) TIME = 0.6428                        CALL BLOCK 5 RESTART;   * coolin        
+                                                                                 
+ **;                                                                             
+                                                                                 
+ COMPILE BLOCK 3;                                                                
+0 LOCN   INSTRUCTION
+ 
+  7952:                                                                          
+  7952:write 1=7,((E13,5)),TIME,T,P,M,OH,HO2,O3 %;                               
+  7992:write 1=8,((E13,5)),TIME,NO,NO2,HO2NO2,HONO,HNO3 %;                       
+  8029:write 1=9,((E13,5)),TIME,C4H8,CHEX,NO3,N2O5 %;                            
+  8063:                                                                          
+  8063:**;                                                                       
+ 
+ NO. OF VARIABLES =   100
+ NO. IMPLICIT     =     0
+ NO. OF ERRORS    =     0
+0SPACE FOR                             IN USE      FREE     TOTAL
+ INTEGER SCALARS AND ARRAYS               136     13536     13672
+ REAL SCALARS AND ARRAYS                 1781     11899     13680
+ INDEXES AND SECRETS                       99       400       499
+ CODE ARRAY                              8064      5608     13672
+ NAME DICTIONARY                          303        97       400
+ TEXT ARRAY                              3185     10815     14000
+ 
+ 
+ 
+                                                                                 
+                                                                                 
+ COMPILE BLOCK 4;                                                                
+0 LOCN   INSTRUCTION
+ 
+  8068:                                                                          
+  8068:T =  873.15;                                                              
+  8074:P =  1000.0;                                                              
+  8080:                                                                          
+  8080:M = NormDensity * (P/NormPress) * (NormTemp/T);                           
+  8100:Mreactor = M;                                                             
+  8106:Mbefore  = Mambient;                                                      
+  8112:                                                                          
+  8112:dummy      = dummy      * M/Mbefore;                                      
+  8124:HCHO       = HCHO       * M/Mbefore;                                      
+  8136:MGLYOX     = MGLYOX     * M/Mbefore;                                      
+  8148:HCOCO      = HCOCO      * M/Mbefore;                                      
+  8160:CH3NO3     = CH3NO3     * M/Mbefore;                                      
+  8172:C2H5O2     = C2H5O2     * M/Mbefore;                                      
+  8184:NO2        = NO2        * M/Mbefore;                                      
+  8196:CH3OH      = CH3OH      * M/Mbefore;                                      
+  8208:O1D        = O1D        * M/Mbefore;                                      
+  8220:HCOCO3     = HCOCO3     * M/Mbefore;                                      
+  8232:O3         = O3         * M/Mbefore;                                      
+  8244:PAN        = PAN        * M/Mbefore;                                      
+  8256:NO3        = NO3        * M/Mbefore;                                      
+  8268:N2O5       = N2O5       * M/Mbefore;                                      
+  8280:H2O2       = H2O2       * M/Mbefore;                                      
+  8292:NO         = NO         * M/Mbefore;                                      
+  8304:NA         = NA         * M/Mbefore;                                      
+  8316:PPN        = PPN        * M/Mbefore;                                      
+  8328:PHAN       = PHAN       * M/Mbefore;                                      
+  8340:HOCH2CO3   = HOCH2CO3   * M/Mbefore;                                      
+  8352:HO2        = HO2        * M/Mbefore;                                      
+  8364:HO2NO2     = HO2NO2     * M/Mbefore;                                      
+  8376:C2H5OH     = C2H5OH     * M/Mbefore;                                      
+  8388:IC3H7NO3   = IC3H7NO3   * M/Mbefore;                                      
+  8400:HOCH2CHO   = HOCH2CHO   * M/Mbefore;                                      
+  8412:CH3COCH3   = CH3COCH3   * M/Mbefore;                                      
+  8424:CH3COCH2O  = CH3COCH2O  * M/Mbefore;                                      
+  8436:CH3CO2H    = CH3CO2H    * M/Mbefore;                                      
+  8448:HCOCH2O2   = HCOCH2O2   * M/Mbefore;                                      
+  8460:ETHOHNO3   = ETHOHNO3   * M/Mbefore;                                      
+  8472:HCOCO3H    = HCOCO3H    * M/Mbefore;                                      
+  8484:CO         = CO         * M/Mbefore;                                      
+  8496:GLYOX      = GLYOX      * M/Mbefore;                                      
+  8508:PERPROACID = PERPROACID * M/Mbefore;                                      
+  8520:HOCH2CH2O2 = HOCH2CH2O2 * M/Mbefore;                                      
+  8532:ACETOL     = ACETOL     * M/Mbefore;                                      
+  8544:PROPACID   = PROPACID   * M/Mbefore;                                      
+  8556:O          = O          * M/Mbefore;                                      
+  8568:HNO3       = HNO3       * M/Mbefore;                                      
+  8580:C2H5CO3    = C2H5CO3    * M/Mbefore;                                      
+  8592:CH3COCH2O2 = CH3COCH2O2 * M/Mbefore;                                      
+  8604:CH3CO3     = CH3CO3     * M/Mbefore;                                      
+  8616:HOCH2CH2O  = HOCH2CH2O  * M/Mbefore;                                      
+  8628:CH3CHO     = CH3CHO     * M/Mbefore;                                      
+  8640:CH3O       = CH3O       * M/Mbefore;                                      
+  8652:IC3H7O     = IC3H7O     * M/Mbefore;                                      
+  8664:HOCH2CO2H  = HOCH2CO2H  * M/Mbefore;                                      
+  8676:C2H5OOH    = C2H5OOH    * M/Mbefore;                                      
+  8688:C2H5O      = C2H5O      * M/Mbefore;                                      
+  8700:HOCH2CO3H  = HOCH2CO3H  * M/Mbefore;                                      
+  8712:OH         = OH         * M/Mbefore;                                      
+  8724:H2         = H2         * M/Mbefore;                                      
+  8736:HYPERACET  = HYPERACET  * M/Mbefore;                                      
+  8748:HONO       = HONO       * M/Mbefore;                                      
+  8760:ETHGLY     = ETHGLY     * M/Mbefore;                                      
+  8772:C2H5NO3    = C2H5NO3    * M/Mbefore;                                      
+  8784:CH3O2NO2   = CH3O2NO2   * M/Mbefore;                                      
+  8796:HYETHO2H   = HYETHO2H   * M/Mbefore;                                      
+  8808:HCOCO2H    = HCOCO2H    * M/Mbefore;                                      
+  8820:HCOCH2OOH  = HCOCH2OOH  * M/Mbefore;                                      
+  8832:CH3OOH     = CH3OOH     * M/Mbefore;                                      
+  8844:HCOCH2O    = HCOCH2O    * M/Mbefore;                                      
+  8856:SA         = SA         * M/Mbefore;                                      
+  8868:CH3CO3H    = CH3CO3H    * M/Mbefore;                                      
+  8880:CH3O2      = CH3O2      * M/Mbefore;                                      
+  8892:O2         = O2         * M/Mbefore;                                      
+  8904:N2         = N2         * M/Mbefore;                                      
+  8916:C4H8       = C4H8       * M/Mbefore;                                      
+  8928:*C3H6       = C3H6       * M/Mbefore;                                     
+  8928:CHEX      = CHEX      * M/Mbefore;                                        
+  8940:                                                                          
+  8940:CALL rtcnst;                                                              
+  8942:                                                                          
+  8942:**;                                                                       
+ 
+ NO. OF VARIABLES =   100
+ NO. IMPLICIT     =     0
+ NO. OF ERRORS    =     0
+0SPACE FOR                             IN USE      FREE     TOTAL
+ INTEGER SCALARS AND ARRAYS               136     13536     13672
+ REAL SCALARS AND ARRAYS                 1782     11898     13680
+ INDEXES AND SECRETS                       99       400       499
+ CODE ARRAY                              8943      4729     13672
+ NAME DICTIONARY                          303        97       400
+ TEXT ARRAY                              3185     10815     14000
+ 
+ 
+ 
+                                                                                 
+ COMPILE BLOCK 5;                                                                
+0 LOCN   INSTRUCTION
+ 
+  8947:                                                                          
+  8947:T =  316.15;                                                              
+  8953:P =  1000.0;                                                              
+  8959:                                                                          
+  8959:M = NormDensity * (P/NormPress) * (NormTemp/T);                           
+  8979:MCRDS = M;                                                                
+  8985:Mbefore  = Mreactor;                                                      
+  8991:                                                                          
+  8991:dummy      = dummy      * M/Mbefore;                                      
+  9003:HCHO       = HCHO       * M/Mbefore;                                      
+  9015:MGLYOX     = MGLYOX     * M/Mbefore;                                      
+  9027:HCOCO      = HCOCO      * M/Mbefore;                                      
+  9039:CH3NO3     = CH3NO3     * M/Mbefore;                                      
+  9051:C2H5O2     = C2H5O2     * M/Mbefore;                                      
+  9063:NO2        = NO2        * M/Mbefore;                                      
+  9075:CH3OH      = CH3OH      * M/Mbefore;                                      
+  9087:O1D        = O1D        * M/Mbefore;                                      
+  9099:HCOCO3     = HCOCO3     * M/Mbefore;                                      
+  9111:O3         = O3         * M/Mbefore;                                      
+  9123:PAN        = PAN        * M/Mbefore;                                      
+  9135:NO3        = NO3        * M/Mbefore;                                      
+  9147:N2O5       = N2O5       * M/Mbefore;                                      
+  9159:H2O2       = H2O2       * M/Mbefore;                                      
+  9171:NO         = NO         * M/Mbefore;                                      
+  9183:NA         = NA         * M/Mbefore;                                      
+  9195:PPN        = PPN        * M/Mbefore;                                      
+  9207:PHAN       = PHAN       * M/Mbefore;                                      
+  9219:HOCH2CO3   = HOCH2CO3   * M/Mbefore;                                      
+  9231:HO2        = HO2        * M/Mbefore;                                      
+  9243:HO2NO2     = HO2NO2     * M/Mbefore;                                      
+  9255:C2H5OH     = C2H5OH     * M/Mbefore;                                      
+  9267:IC3H7NO3   = IC3H7NO3   * M/Mbefore;                                      
+  9279:HOCH2CHO   = HOCH2CHO   * M/Mbefore;                                      
+  9291:CH3COCH3   = CH3COCH3   * M/Mbefore;                                      
+  9303:CH3COCH2O  = CH3COCH2O  * M/Mbefore;                                      
+  9315:CH3CO2H    = CH3CO2H    * M/Mbefore;                                      
+  9327:HCOCH2O2   = HCOCH2O2   * M/Mbefore;                                      
+  9339:ETHOHNO3   = ETHOHNO3   * M/Mbefore;                                      
+  9351:HCOCO3H    = HCOCO3H    * M/Mbefore;                                      
+  9363:CO         = CO         * M/Mbefore;                                      
+  9375:GLYOX      = GLYOX      * M/Mbefore;                                      
+  9387:PERPROACID = PERPROACID * M/Mbefore;                                      
+  9399:HOCH2CH2O2 = HOCH2CH2O2 * M/Mbefore;                                      
+  9411:ACETOL     = ACETOL     * M/Mbefore;                                      
+  9423:PROPACID   = PROPACID   * M/Mbefore;                                      
+  9435:O          = O          * M/Mbefore;                                      
+  9447:HNO3       = HNO3       * M/Mbefore;                                      
+  9459:C2H5CO3    = C2H5CO3    * M/Mbefore;                                      
+  9471:CH3COCH2O2 = CH3COCH2O2 * M/Mbefore;                                      
+  9483:CH3CO3     = CH3CO3     * M/Mbefore;                                      
+  9495:HOCH2CH2O  = HOCH2CH2O  * M/Mbefore;                                      
+  9507:CH3CHO     = CH3CHO     * M/Mbefore;                                      
+  9519:CH3O       = CH3O       * M/Mbefore;                                      
+  9531:IC3H7O     = IC3H7O     * M/Mbefore;                                      
+  9543:HOCH2CO2H  = HOCH2CO2H  * M/Mbefore;                                      
+  9555:C2H5OOH    = C2H5OOH    * M/Mbefore;                                      
+  9567:C2H5O      = C2H5O      * M/Mbefore;                                      
+  9579:HOCH2CO3H  = HOCH2CO3H  * M/Mbefore;                                      
+  9591:OH         = OH         * M/Mbefore;                                      
+  9603:H2         = H2         * M/Mbefore;                                      
+  9615:HYPERACET  = HYPERACET  * M/Mbefore;                                      
+  9627:HONO       = HONO       * M/Mbefore;                                      
+  9639:ETHGLY     = ETHGLY     * M/Mbefore;                                      
+  9651:C2H5NO3    = C2H5NO3    * M/Mbefore;                                      
+  9663:CH3O2NO2   = CH3O2NO2   * M/Mbefore;                                      
+  9675:HYETHO2H   = HYETHO2H   * M/Mbefore;                                      
+  9687:HCOCO2H    = HCOCO2H    * M/Mbefore;                                      
+  9699:HCOCH2OOH  = HCOCH2OOH  * M/Mbefore;                                      
+  9711:CH3OOH     = CH3OOH     * M/Mbefore;                                      
+  9723:HCOCH2O    = HCOCH2O    * M/Mbefore;                                      
+  9735:SA         = SA         * M/Mbefore;                                      
+  9747:CH3CO3H    = CH3CO3H    * M/Mbefore;                                      
+  9759:CH3O2      = CH3O2      * M/Mbefore;                                      
+  9771:O2         = O2         * M/Mbefore;                                      
+  9783:N2         = N2         * M/Mbefore;                                      
+  9795:C4H8       = C4H8       * M/Mbefore;                                      
+  9807:*C3H6       = C3H6       * M/Mbefore;                                     
+  9807:CHEX      = CHEX      * M/Mbefore;                                        
+  9819:                                                                          
+  9819:CALL rtcnst;                                                              
+  9821:                                                                          
+  9821:**;                                                                       
+ 
+ NO. OF VARIABLES =   100
+ NO. IMPLICIT     =     0
+ NO. OF ERRORS    =     0
+0SPACE FOR                             IN USE      FREE     TOTAL
+ INTEGER SCALARS AND ARRAYS               136     13536     13672
+ REAL SCALARS AND ARRAYS                 1783     11897     13680
+ INDEXES AND SECRETS                       99       400       499
+ CODE ARRAY                              9822      3850     13672
+ NAME DICTIONARY                          303        97       400
+ TEXT ARRAY                              3185     10815     14000
+ 
+ 
+ 
+                                                                                 
+ BEGIN;                                                                          
+ 2.9315e+02                                                                      
+ 1.0000e+03                                                                      
+ 8.7315e+02                                                                      
+ 3.1615e+02                                                                      
+ 8.0000e+00                                                                      
+ 1.0000e-12                                                                      
+ 9.9740e-06                                                                      
+ 0.0000e+00                                                                      
+ 0.0000e+00                                                                      
+ 0.0000e+00                                                                      
+ 0.0000e+00                                                                      
+ 9.8081e-07                                                                      
+ 1.0000e-12                                                                      
+ 0.0000e+00                                                                      
+ 0.0000e+00                                                                      
+ 7.3560e-07                                                                      
+ 0.0000e+00                                                                      
+ 0.0000e+00                                                                      
+ 0.0000e+00                                                                      
+0TIME   .0000000E+00  TCPU     35.92       .00
+   STP      0  TRY      0  DER       0  JAC     0  LUD      0  RST     0
+0***** COMMAND INTERPRETER RE-ENTERED
+ 
+ STOP;                                                                           
+0***** FORMATTED WRITE STRUCTURE NUMBER  1 CLEARED
+0TIME  1.0500000E+01  TCPU    615.38       .00
+   STP    756  TRY    765  DER    1600  JAC     5  LUD     84  RST     3
+0 MAXIMUM SPACE REQUIREMENTS - 
+ NAMES  303   INTS   4447   REALS   3661   CODE  9822   VBLS   100
+ 
